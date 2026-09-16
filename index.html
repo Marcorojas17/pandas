@@ -45,6 +45,9 @@
            display:inline-block; animation:p 2s infinite;
            vertical-align:middle; margin-right:8px; }
   @keyframes p { 0%{opacity:1} 50%{opacity:.3} 100%{opacity:1} }
+  .qr-link { margin-top:20px; font-size:.7em; }
+  .qr-link a { color:var(--p); text-decoration:none; letter-spacing:1px; }
+  .qr-link a:hover { color:var(--g); }
   footer { margin-top:50px; padding:20px; font-size:.65em;
            color:#555; border-top:1px solid #222; line-height:1.8; }
   @media (max-width:600px) {
@@ -75,6 +78,10 @@
     <p class="hash-label">HASH SHA-256:</p>
     <p class="hash" id="hash">—</p>
   </div>
+
+  <p class="qr-link">
+    <a href="qr.html">[ generar código QR → ]</a>
+  </p>
 </main>
 
 <footer>
@@ -91,7 +98,6 @@
 const AUTHORITY = "2608096674952";
 
 // ── FOLIOS VÁLIDOS · Lista embebida (fallback seguro) ──────
-// Edita esta lista cuando quieras añadir folios nuevos.
 let FOLIOS_VALIDOS = [
   "FVD-00001",
   "FVD-150499",
