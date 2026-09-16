@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KRONOS · Modo Auditor</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23050a14' stroke='%2300f2ff' stroke-width='4'/><circle cx='50' cy='50' r='18' fill='%2300f2ff'/></svg>">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  body { background:#050a14; color:#fff; font-family:'JetBrains Mono',monospace;
+         margin:0; min-height:100vh; padding:20px; }
+  .panel { max-width:800px; margin:20px auto; background:rgba(10,25,47,.95);
+           padding:30px; border-left:5px solid #bd00ff; border-radius:4px;
+           box-shadow:0 0 50px rgba(189,0,255,.3); }
+  h2 { color:#bd00ff; letter-spacing:3px; }
+  input { width:100%; padding:15px; background:#000; border:1px solid #bd00ff;
+          color:#bd00ff; font-family:inherit; border-radius:4px; margin-bottom:10px; }
+  button { width:100%; padding:15px; background:#bd00ff; color:#fff;
+           border:none; font-weight:bold; cursor:pointer;
+           text-transform:uppercase; letter-spacing:3px; border-radius:4px;
+           font-family:inherit; }
+  button:hover { background:#d4af37; color:#000; }
+  #info { display:none; margin-top:25px; background:#000; padding:20px;
+          border-radius:8px; border:1px dashed #bd00ff; }
+  .row { display:flex; justify-content:space-between; padding:8px 0;
+         border-bottom:1px solid #1a1a1a; font-size:.85em; }
+  .row:last-child { border:none; }
+  .k { color:#d4af37; }
+  .v { color:#00f2ff; }
+  .back { margin-top:20px; font-size:.75em; }
+  .back a { color:#bd00ff; text-decoration:none; }
+  .warn { color:#ff0041; font-size:.7em; margin-top:15px; line-height:1.6; }
+</style>
+</head>
+<body>
+<main class="panel">
+  <h2>⚿ MODO AUDITOR</h2>
+  <p style="font-size:.75em; color:#888;">
+    Acceso restringido · Solo mando autorizado
+  </p>
+
+  <input type="password" id="master" placeholder="CLAVE MAESTRA DE AUDITORÍA">
+  <button id="entrar">DESBLOQUEAR</button>
+
+  <div id="info">
+    <div class="row"><span class="k">Estado</span><span class="v">VERDE 0 · AUTORIZADO</span></div>
+    <div class="row"><span class="k">Folios válidos</span><span class="v" id="n-folios">—</span></div>
+    <div class="row"><span class="k">Escaneos locales</span><span class="v" id="n-hist">—</span></div>
+    <div class="row"><span class="k">Último VERDE</span><span class="v" id="ult-verde">—</span></div>
+    <div class="row"><span class="k">Último ROJO</span><span class="v" id="ult-rojo">—</span></div>
+    <div class="row"><span class="k">Sesión iniciada</span><span class="v" id="sesion">—</span></div>
+
+    <button id="export-full" style="margin-top:15px;">EXPORTAR TODO</button>
+    <button id="purge" style="margin-top:8px; background:#ff0041; color:#fff;">
+      PURGAR HISTORIAL
+    </button>
+  </div>
+
+  <p class="warn">
+    ⚠ Nota de seguridad: en GitHub Pages esta clave también es visible
+    en el código fuente. Para secreto real, mueve la validación al
+    Cloudflare Worker con variables de entorno.
+  </p>
+
+  <p class="back"><a href="index.html">← volver</a></p>
+</main>
+
+<script>
+// ═══ CLAVE MAESTRA (cámbiala) ═══
+const AUDITOR_KEY = "KRONOS-2026-AUDIT-Ω";
+// ════════════════════════════════
+
+document.getElementById("entrar").addEventListener("click", async () => {
+  const k = document.getElementById("master").value;
+  if (k !== AUDITOR_KEY) {
+    alert("✗ Clave incorrecta");
+    return;
+  }
+
+  const info = document.getElementById("info");
+  info.style.display = "block";
+
+  // Cargar folios
+  let folios = ["FVD-00001", "FVD-150499", "FVD-2026-001"];
+  try {
+    const r = await fetch("folios.json");
+    if (r.ok) {
+      const d = await r.json();
+      if (Array.isArray(d.folios_validos)) folios = d.folios_validos;
+    }
+  } catch(e) {}
+  document.getElementById("n-folios").textContent = folios.length;
+
+  // Historial
+  const hist = JSON.parse(localStorage.getItem("kronos_historial_v1") || "[]");
+  document.getElementById("n-hist").textContent = hist.length;
+
+  const verdes = hist.filter(x => x.estado === "VERDE");
+  const rojos = hist.filter(x => x.estado !== "VERDE");
+
+  document.getElementById("ult-verde").textContent =
+    verdes.length ? `${verdes[verdes.length-1].folio} · ${verdes[verdes.length-1].fecha}` : "—";
+  document.getElementById("ult-rojo").textContent =
+    rojos.length ? `${rojos[rojos.length-1].folio} · ${rojos[rojos.length-1].fecha}` : "—";
+  document.getElementById("sesion").textContent = new Date().toLocaleString("es-MX");
+
+  document.getElementById("export-full").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify({
+      folios, historial: hist, exportado: new Date().toISOString()
+    }, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "kronos-audit-" + Date.now() + ".json";
+    a.click();
+  });
+
+  document.getElementById("purge").addEventListener("click", () => {
+    if (confirm("¿Purgar TODO el historial local?")) {
+      localStorage.removeItem("kronos_historial_v1");
+      location.reload();
+    }
+  });
+});
+</script>
+</body>
+</html>
