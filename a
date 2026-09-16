@@ -89,3 +89,41 @@
 ║ ▓                                                                          ║
 ║ ▓   root@kronos:~# _                                                       ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ ║
+║ ▓   root@kronos:~# ./verify --deployed --all-checks                        ║
+║ ▓   [████████████████████████████████████████] 100%                       ║
+║ ▓                                                                          ║
+║ ▓   ✓ index.html actualizado                                               ║
+║ ▓   ✓ folios.json creado                                                   ║
+║ ▓   ✓ Doble validación operativa                                           ║
+║ ▓                                                                          ║
+║ ▓   → ARQUITECTO, CONFIRMA CON 4 PRUEBAS                                   ║
+║▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+╔══════════════════════════════════════════════════════════════════════════╗
+║                                                                          ║
+║  PRUEBA A · Debe salir VERDE                                             ║
+║    FOLIO:      FVD-150499                                                ║
+║    AUTORIDAD:  2608096674952                                             ║
+║    ESPERADO:   VERDE 0 · ACTIVO + HASH                                   ║
+║                                                                          ║
+║  PRUEBA B · Debe salir ROJO 1                                            ║
+║    FOLIO:      FVD-150499                                                ║
+║    AUTORIDAD:  12345                                                     ║
+║    ESPERADO:   ROJO 1 · DENEGADO                                         ║
+║                                                                          ║
+║  PRUEBA C · Debe salir ROJO 2                                            ║
+║    FOLIO:      FVD-99999        ← no está en folios.json                 ║
+║    AUTORIDAD:  2608096674952                                             ║
+║    ESPERADO:   ROJO 2 · NO REGISTRADO                                    ║
+║                                                                          ║
+║  PRUEBA D · Debe salir VERDE                                             ║
+║    FOLIO:      FVD-00001        ← sí está en folios.json                 ║
+║    AUTORIDAD:  2608096674952                                             ║
+║    ESPERADO:   VERDE 0 · ACTIVO + HASH                                   ║
+║                                                                          ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
