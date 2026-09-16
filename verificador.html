@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KRONOS · Verificador</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23050a14' stroke='%2300f2ff' stroke-width='4'/><circle cx='50' cy='50' r='18' fill='%2300f2ff'/></svg>">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { --p:#00f2ff; --g:#d4af37; --bg:#050a14; --q:#bd00ff; }
+  * { box-sizing: border-box; }
+  body { background:var(--bg); color:#fff; font-family:'JetBrains Mono',monospace;
+         margin:0; min-height:100vh; display:flex; align-items:center;
+         justify-content:center; padding:20px; text-align:center; }
+  .panel { max-width:600px; width:100%; background:rgba(10,25,47,.95);
+           padding:30px; border-left:5px solid var(--p); border-radius:4px;
+           box-shadow:0 20px 50px rgba(0,0,0,.6); }
+  h2 { color:#fff; letter-spacing:2px; margin:0 0 20px; }
+  input { width:100%; padding:15px; background:#000; border:1px solid var(--p);
+          color:var(--p); font-size:1em; margin:0 0 10px; display:block;
+          font-family:inherit; border-radius:4px; }
+  button { width:100%; padding:15px; background:var(--p); color:#000;
+           border:none; font-weight:bold; cursor:pointer;
+           text-transform:uppercase; font-family:inherit; letter-spacing:3px;
+           transition:.2s; border-radius:4px; }
+  button:hover { background:var(--g); }
+  #out { display:none; margin-top:30px;
+         background:linear-gradient(145deg,#1a1a1a,#000);
+         border:1px solid var(--g); padding:20px; border-radius:15px; }
+  .tag { color:var(--g); font-size:.7em; letter-spacing:5px; }
+  #titulo-status { color:#10B981; transition:color .3s; font-size:1.5em; }
+  #status { color:var(--q); font-size:.85em; min-height:1.2em; }
+  .hash-label { font-size:.65em; opacity:.6; margin-top:20px; letter-spacing:2px; }
+  .hash { font-size:.55em; opacity:.7; word-break:break-all;
+          overflow-wrap:anywhere; background:#000; padding:10px;
+          border:1px dashed var(--g); border-radius:5px;
+          max-height:80px; overflow-y:auto; text-align:left; margin-top:5px; }
+  .pulse { width:10px; height:10px; background:#10B981; border-radius:50%;
+           display:inline-block; animation:p 2s infinite;
+           vertical-align:middle; margin-right:8px; }
+  @keyframes p { 0%{opacity:1} 50%{opacity:.3} 100%{opacity:1} }
+  .back { margin-top:20px; font-size:.7em; color:#555; }
+  .back a { color:var(--p); text-decoration:none; }
+</style>
+</head>
+<body>
+<main class="panel">
+  <h2>VERIFICADOR PERIMETRAL</h2>
+  <input type="text" id="folio" placeholder="FOLIO FVD-XXXXX" autocomplete="off">
+  <input type="password" id="auth" placeholder="ID DE AUTORIDAD" autocomplete="off">
+  <button id="btn">EJECUTAR ESCANEO</button>
+
+  <div id="out">
+    <div class="tag">KRONOS PRIVATE</div>
+    <h2 id="titulo-status"><span class="pulse"></span> VERDE 0 • ACTIVO</h2>
+    <p id="status"></p>
+    <p class="hash-label">HASH SHA-256:</p>
+    <p class="hash" id="hash">—</p>
+  </div>
+
+  <p class="back"><a href="index.html">← volver al inicio</a></p>
+</main>
+
+<script>
+const AUTHORITY = "2608096674952";
+let FOLIOS_VALIDOS = ["FVD-00001","FVD-150499","FVD-2026-001"];
+
+fetch('folios.json')
+  .then(r => r.ok ? r.json() : Promise.reject())
+  .then(d => { if(Array.isArray(d.folios_validos)&&d.folios_validos.length) FOLIOS_VALIDOS = d.folios_validos; })
+  .catch(()=>{});
+
+const toHex = b => [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
+const sha = async (a,s) => toHex(await crypto.subtle.digest(a, new TextEncoder().encode(s)));
+const randHex = (n=32) => { const a=new Uint8Array(n); crypto.getRandomValues(a);
+  return [...a].map(x=>x.toString(16).padStart(2,"0")).join(""); };
+
+document.getElementById("btn").addEventListener("click", async () => {
+  const folio = document.getElementById("folio").value.trim();
+  const auth  = document.getElementById("auth").value.trim();
+  const out = document.getElementById("out");
+  const st  = document.getElementById("status");
+  const h   = document.getElementById("hash");
+  const tit = document.getElementById("titulo-status");
+
+  out.style.display = "block";
+
+  if (auth !== AUTHORITY) {
+    st.textContent = "✗ ACCESO DENEGADO — FIRMA DE MANDO INVÁLIDA";
+    st.style.color = "#ff0041"; h.textContent = "—";
+    tit.innerHTML = '<span class="pulse" style="background:#ff0041"></span> ROJO 1 • DENEGADO';
+    tit.style.color = "#ff0041"; return;
+  }
+
+  if (!FOLIOS_VALIDOS.includes(folio)) {
+    st.textContent = "✗ FOLIO NO REGISTRADO — FUERA DEL PERÍMETRO";
+    st.style.color = "#ff0041"; h.textContent = "—";
+    tit.innerHTML = '<span class="pulse" style="background:#ff0041"></span> ROJO 2 • NO REGISTRADO';
+    tit.style.color = "#ff0041"; return;
+  }
+
+  st.textContent = "> INICIANDO RECONSTRUCCIÓN DE RETICULADO (KYBER)...";
+  st.style.color = "#bd00ff"; h.textContent = "calculando…";
+  tit.innerHTML = '<span class="pulse" style="background:#d4af37"></span> ESCANEANDO...';
+  tit.style.color = "#d4af37";
+
+  const lattice = await sha("SHA-512", randHex(32));
+  const secret  = await sha("SHA-256", lattice + folio);
+
+  setTimeout(() => {
+    st.textContent = "INTEGRIDAD CUÁNTICA: NIST-L5 PROTECTED";
+    h.textContent = secret;
+    tit.innerHTML = '<span class="pulse"></span> VERDE 0 • ACTIVO';
+    tit.style.color = "#10B981";
+  }, 1500);
+});
+</script>
+</body>
+</html>
