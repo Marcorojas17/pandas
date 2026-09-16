@@ -107,7 +107,6 @@ fetch('folios.json')
   })
   .catch(() => console.warn("folios.json no cargado, usando lista embebida"));
 
-// ── Guardar historial local ────────────────────────────────
 function guardarHistorial(folio, estado, hash) {
   const KEY = "kronos_historial_v1";
   const datos = JSON.parse(localStorage.getItem(KEY) || "[]");
@@ -121,7 +120,6 @@ function guardarHistorial(folio, estado, hash) {
   localStorage.setItem(KEY, JSON.stringify(datos));
 }
 
-// ── Utilidades criptográficas ──────────────────────────────
 const toHex = buf => [...new Uint8Array(buf)]
   .map(b => b.toString(16).padStart(2,"0")).join("");
 
@@ -144,14 +142,14 @@ async function shield(payload, auth) {
   return { ok:true, lattice, secret };
 }
 
-// ── Controlador de UI ───────────────────────────────────────
 document.getElementById("btn").addEventListener("click", async () => {
-  const folio = document.getElementById("folio").value.trim();
-  const auth  = document.getElementById("auth").value.trim();
-  const out   = document.getElementById("out");
-  const st    = document.getElementById("status");
-  const h     = document.getElementById("hash");
-  const tit   = document.getElementById("titulo-status");
+  const folioRaw = document.getElementById("folio").value.trim();
+  const folio    = folioRaw || "FVD-00000";   // ← FIX: folio vacío
+  const auth     = document.getElementById("auth").value.trim();
+  const out      = document.getElementById("out");
+  const st       = document.getElementById("status");
+  const h        = document.getElementById("hash");
+  const tit      = document.getElementById("titulo-status");
 
   out.style.display = "block";
 
