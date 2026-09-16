@@ -17,7 +17,7 @@
   #qrbox { background:#fff; padding:20px; border-radius:10px;
            display:inline-block; margin:20px auto;
            box-shadow:0 0 30px rgba(0,242,255,.5); }
-  #qrbox canvas { display:block; width:320px; height:320px; }
+  #qrbox canvas { display:block; width:320px; height:320px; max-width:100%; }
   .url { font-size:.65em; color:#00f2ff; word-break:break-all; margin-top:15px; }
   button { width:100%; padding:15px; background:#00f2ff; color:#000;
            border:none; font-weight:bold; cursor:pointer;
@@ -43,11 +43,11 @@
 const URL_VERIF = "https://narcorojas17.github.io/verificador.html";
 const SIZE = 600;
 const cv = document.getElementById("cv");
-cv.width  = SIZE;
+cv.width = SIZE;
 cv.height = SIZE;
 const ctx = cv.getContext("2d");
 
-// Cargar QR base desde API
+// Cargar QR base con ECC nivel H (máxima corrección)
 const img = new Image();
 img.crossOrigin = "anonymous";
 img.src = "https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=0&ecc=H&data="
@@ -70,7 +70,7 @@ img.onerror = () => {
 function dibujarOjo() {
   const cx = SIZE / 2;
   const cy = SIZE / 2;
-  const R  = SIZE * 0.11;   // 11% del tamaño total (seguro para ECC H)
+  const R  = SIZE * 0.11; // 11% del tamaño total — seguro con ECC H
 
   // Círculo base negro
   ctx.fillStyle = "#000";
@@ -97,7 +97,7 @@ function dibujarOjo() {
   ctx.arc(cx, cy, R * 0.20, 0, Math.PI * 2);
   ctx.fill();
 
-  // Brillo del ojo
+  // Brillo cyan
   ctx.fillStyle = "#00f2ff";
   ctx.beginPath();
   ctx.arc(cx - R*0.15, cy - R*0.15, R*0.10, 0, Math.PI * 2);
