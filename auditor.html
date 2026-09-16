@@ -20,7 +20,7 @@
   button { width:100%; padding:15px; background:#bd00ff; color:#fff;
            border:none; font-weight:bold; cursor:pointer;
            text-transform:uppercase; letter-spacing:3px; border-radius:4px;
-           font-family:inherit; transition:.2s; }
+           font-family:inherit; transition:.2s; margin-top:8px; }
   button:hover { background:#d4af37; color:#000; }
   #info { display:none; margin-top:25px; background:#000; padding:20px;
           border-radius:8px; border:1px dashed #bd00ff; }
@@ -40,6 +40,17 @@
   .back a { color:#bd00ff; text-decoration:none; }
   .warn { color:#ffcc00; font-size:.7em; margin-top:15px; line-height:1.6; }
   h3 { color:#bd00ff; letter-spacing:2px; margin-top:30px; font-size:.9em; }
+  .btn-group { display:grid; grid-template-columns:1fr; gap:8px; margin-top:15px; }
+  .btn-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .btn-row button { margin-top:0; font-size:.7em; padding:12px 8px;
+                    letter-spacing:1px; }
+  #json-view { display:none; margin-top:15px; background:#000;
+               border:1px dashed #00f2ff; border-radius:5px;
+               padding:12px; max-height:300px; overflow-y:auto;
+               font-size:.6em; text-align:left; white-space:pre-wrap;
+               word-break:break-all; color:#00f2ff; }
+  .copy-msg { color:#10B981; font-size:.7em; margin-top:8px;
+              min-height:1em; text-align:center; }
 </style>
 </head>
 <body>
@@ -61,10 +72,18 @@
     <h3>▸ HISTORIAL</h3>
     <div id="historial"></div>
 
-    <button id="export-full" style="margin-top:15px;">EXPORTAR TODO</button>
-    <button id="purge" style="margin-top:8px; background:#ff0041; color:#fff;">
-      PURGAR HISTORIAL
-    </button>
+    <div class="btn-group">
+      <button id="btn-download">⬇ DESCARGAR JSON</button>
+      <div class="btn-row">
+        <button id="btn-copy">⎘ COPIAR</button>
+        <button id="btn-view">👁 VER</button>
+      </div>
+      <button id="purge" style="background:#ff0041; color:#fff;">
+        ⨯ PURGAR HISTORIAL
+      </button>
+    </div>
+    <p class="copy-msg" id="copy-msg"></p>
+    <pre id="json-view"></pre>
   </div>
 
   <p class="warn">
@@ -76,9 +95,11 @@
 </main>
 
 <script>
-// ═══ CLAVE MAESTRA (cámbiala por la tuya) ═══
+// ═══ CLAVE MAESTRA ═══
 const AUDITOR_KEY = "KRONOS-2026-AUDIT";
-// ════════════════════════════════════════════
+// ═══════════════════════
+
+let DATOS_EXPORT = null;
 
 document.getElementById("entrar").addEventListener("click", async () => {
   const k = document.getElementById("master").value;
@@ -90,7 +111,6 @@ document.getElementById("entrar").addEventListener("click", async () => {
   const info = document.getElementById("info");
   info.style.display = "block";
 
-  // Cargar folios
   let folios = ["FVD-00001", "FVD-150499", "FVD-2026-001"];
   try {
     const r = await fetch("folios.json");
@@ -99,10 +119,19 @@ document.getElementById("entrar").addEventListener("click", async () => {
       if (Array.isArray(d.folios_validos)) folios = d.folios_validos;
     }
   } catch(e) {}
-  document.getElementById("n-folios").textContent = folios.length;
 
-  // Historial
   const hist = JSON.parse(localStorage.getItem("kronos_historial_v1") || "[]");
+
+  DATOS_EXPORT = {
+    exportado: new Date().toISOString(),
+    arquitecto: "Marco Antonio Rojas Valdovinos",
+    sistema: "KRONOS V17",
+    folios_validos: folios,
+    total_escaneos: hist.length,
+    historial: hist
+  };
+
+  document.getElementById("n-folios").textContent = folios.length;
   document.getElementById("n-hist").textContent = hist.length;
 
   const verdes = hist.filter(x => x.estado === "VERDE");
@@ -112,10 +141,8 @@ document.getElementById("entrar").addEventListener("click", async () => {
     verdes.length ? `${verdes[verdes.length-1].folio} · ${verdes[verdes.length-1].fecha}` : "—";
   document.getElementById("ult-rojo").textContent =
     rojos.length ? `${rojos[rojos.length-1].folio} · ${rojos[rojos.length-1].fecha}` : "—";
-  document.getElementById("sesion").textContent =
-    new Date().toLocaleString("es-MX");
+  document.getElementById("sesion").textContent = new Date().toLocaleString("es-MX");
 
-  // Render historial
   const cont = document.getElementById("historial");
   if (!hist.length) {
     cont.innerHTML = '<p class="sub" style="text-align:center;">Sin registros todavía.</p>';
@@ -127,24 +154,79 @@ document.getElementById("entrar").addEventListener("click", async () => {
       </div>
     `).join("");
   }
-
-  document.getElementById("export-full").addEventListener("click", () => {
-    const blob = new Blob([JSON.stringify({
-      folios, historial: hist, exportado: new Date().toISOString()
-    }, null, 2)], { type: "application/json" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "kronos-audit-" + Date.now() + ".json";
-    a.click();
-  });
-
-  document.getElementById("purge").addEventListener("click", () => {
-    if (confirm("¿Purgar TODO el historial local?")) {
-      localStorage.removeItem("kronos_historial_v1");
-      location.reload();
-    }
-  });
 });
+
+// ═══ EXPORT · MÉTODO 1 · DESCARGA ═══
+document.getElementById("btn-download").addEventListener("click", () => {
+  if (!DATOS_EXPORT) return;
+  const json = JSON.stringify(DATOS_EXPORT, null, 2);
+  const blob = new Blob([json], { type: "application/json" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href = url;
+  a.download = "kronos-audit-" + Date.now() + ".json";
+  a.style.display = "none";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 1000);
+  mostrarMsg("⬇ Descarga iniciada");
+});
+
+// ═══ EXPORT · MÉTODO 2 · COPIAR AL PORTAPAPELES ═══
+document.getElementById("btn-copy").addEventListener("click", async () => {
+  if (!DATOS_EXPORT) return;
+  const json = JSON.stringify(DATOS_EXPORT, null, 2);
+  try {
+    await navigator.clipboard.writeText(json);
+    mostrarMsg("✓ Copiado al portapapeles");
+  } catch (e) {
+    // Fallback para navegadores sin clipboard API
+    const ta = document.createElement("textarea");
+    ta.value = json;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand("copy");
+      mostrarMsg("✓ Copiado (método clásico)");
+    } catch (e2) {
+      mostrarMsg("✗ No se pudo copiar. Usa VER y selecciona manual.");
+    }
+    document.body.removeChild(ta);
+  }
+});
+
+// ═══ EXPORT · MÉTODO 3 · VER EN PANTALLA ═══
+document.getElementById("btn-view").addEventListener("click", () => {
+  if (!DATOS_EXPORT) return;
+  const v = document.getElementById("json-view");
+  if (v.style.display === "block") {
+    v.style.display = "none";
+  } else {
+    v.textContent = JSON.stringify(DATOS_EXPORT, null, 2);
+    v.style.display = "block";
+    mostrarMsg("👁 JSON visible abajo");
+  }
+});
+
+// ═══ PURGAR ═══
+document.getElementById("purge").addEventListener("click", () => {
+  if (confirm("¿Purgar TODO el historial local?")) {
+    localStorage.removeItem("kronos_historial_v1");
+    location.reload();
+  }
+});
+
+// ═══ UTILIDADES ═══
+function mostrarMsg(txt) {
+  const m = document.getElementById("copy-msg");
+  m.textContent = txt;
+  setTimeout(() => { m.textContent = ""; }, 2500);
+}
 </script>
 </body>
 </html>
