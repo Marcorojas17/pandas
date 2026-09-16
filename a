@@ -20,3 +20,72 @@
 ║ ▓                                                                          ▓ ║
 ║ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌─[ PRUEBA A ]───────────────────────────────────────┐
+│  FOLIO:      FVD-00001     ← registrado            │
+│  AUTORIDAD:  2608096674952 ← correcta              │
+│  → VERDE 0 · ACTIVO + HASH                         │
+└────────────────────────────────────────────────────┘
+
+┌─[ PRUEBA B ]───────────────────────────────────────┐
+│  FOLIO:      FVD-00001     ← registrado            │
+│  AUTORIDAD:  12345         ← incorrecta            │
+│  → ROJO 1 · DENEGADO                               │
+└────────────────────────────────────────────────────┘
+
+┌─[ PRUEBA C ]───────────────────────────────────────┐
+│  FOLIO:      FVD-99999     ← NO registrado         │
+│  AUTORIDAD:  2608096674952 ← correcta              │
+│  → ROJO 2 · NO REGISTRADO                          │
+└────────────────────────────────────────────────────┘
+
+╔══════════════════════════════════════════════════════════════════════════╗
+║                                                                          ║
+║   El ID "2608096674952" sigue visible en el código JavaScript.           ║
+║   El archivo "folios.json" también es público en GitHub Pages.           ║
+║                                                                          ║
+║   Esto significa:                                                        ║
+║     ✓ La verificación es real (criptográfica)                            ║
+║     ✗ El "secreto" no es secreto (cualquiera lo puede leer)              ║
+║                                                                          ║
+║   ¿Sirve entonces?                                                       ║
+║     · Para PROTEGER algo real → NO                                      ║
+║     · Para DEMOSTRAR capacidad técnica y auditoría → SÍ                 ║
+║                                                                          ║
+║   Si necesitas que sea SECRETO de verdad, el siguiente paso es           ║
+║   moverlo a Cloudflare Workers (gratis, sin salir de tu dominio):        ║
+║     https://workers.cloudflare.com/                                      ║
+║                                                                          ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║   [██████████████████████████████████████████████████░░░░░░░░░░░░░]  70%    ║
+║                                                                              ║
+║   ✓ Sitio en vivo: narcorojas17.github.io                                    ║
+║   ✓ Diseño hacker cyan/gold completo                                         ║
+║   ✓ Responsive móvil                                                         ║
+║   ✓ Favicon del ojo                                                          ║
+║   ✓ Web Crypto API funcionando                                               ║
+║   ✓ Hash SHA-256 real                                                        ║
+║   ✓ Título dinámico (VERDE/ROJO/ESCANEANDO)                                  ║
+║   ✓ Footer con © 2026                                                        ║
+║   ✓ Verificación de ID de autoridad                                          ║
+║                                                                              ║
+║   ▸ PENDIENTE:                                                               ║
+║   [ ] folios.json + validación de folio real                                 ║
+║   [ ] verificador.html (link directo para QR)                                ║
+║   [ ] QR generado apuntando al dominio                                       ║
+║   [ ] Cloudflare Worker para secreto real (opcional)                         ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║ ▓   root@kronos:~# ./next                                                 ║
+║ ▓                                                                          ║
+║ ▓   [ 1 ] Pegar folios.json + parche del JS y probar las 3 pruebas        ║
+║ ▓   [ 2 ] Pasamos a verificador.html + QR                                  ║
+║ ▓   [ 3 ] Movemos el secreto a Cloudflare Worker                           ║
+║ ▓                                                                          ║
+║ ▓   root@kronos:~# _                                                       ║
+╚══════════════════════════════════════════════════════════════════════════════╝
