@@ -2,122 +2,115 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>SCDR-001 · TERMINAL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KRONOS V17 | Quantum Sovereign</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --primary: #00f2ff;
+    --gold:    #d4af37;
+    --bg:      #050a14;
+    --quantum: #bd00ff;
+  }
   body {
-    background: #0a0d10;
-    color: #00ff41;
-    font-family: 'Courier New', monospace;
-    padding: 20px;
-    line-height: 1.5;
+    background: var(--bg);
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    margin: 0;
+    text-align: center;
   }
-  .terminal {
-    max-width: 1000px;
-    margin: 0 auto;
-    border: 1px solid #00ff41;
-    padding: 20px;
-    box-shadow: 0 0 20px rgba(0,255,65,0.3);
+  header {
+    padding: 50px;
+    border-bottom: 1px solid var(--primary);
+    background: linear-gradient(to bottom, #0a1a1e, transparent);
   }
-  .bar {
-    background: #00ff41;
-    color: #0a0d10;
-    padding: 5px 10px;
-    font-weight: bold;
-    margin: -20px -20px 20px -20px;
+  .logo {
+    width: 120px;
+    filter: drop-shadow(0 0 15px var(--primary));
   }
-  h1, h2 { color: #00ffff; margin: 20px 0 10px 0; }
-  pre {
-    background: #000;
-    border-left: 3px solid #00ff41;
+  .mando-panel {
+    max-width: 800px;
+    margin: 40px auto;
+    background: rgba(10,25,47,0.9);
+    padding: 30px;
+    border-left: 5px solid var(--primary);
+    border-radius: 4px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+  input {
+    width: 80%;
     padding: 15px;
-    overflow-x: auto;
-    color: #00ff41;
-    margin: 10px 0;
+    background: #000;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    font-size: 1.2em;
+    margin-bottom: 10px;
   }
-  .prompt::before { content: "root@scdr-001:~# "; color: #ff00ff; }
-  .ok   { color: #00ff41; }
-  .warn { color: #ffcc00; }
-  .err  { color: #ff0041; }
-  .box {
-    border: 1px solid #00ffff;
-    padding: 10px;
-    margin: 15px 0;
+  button {
+    width: 80%;
+    padding: 15px;
+    background: var(--primary);
+    color: #000;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
   }
-  a { color: #00ffff; text-decoration: none; }
-  a:hover { text-decoration: underline; }
+  #resultado {
+    display: none;
+    margin-top: 30px;
+    background: linear-gradient(145deg, #1a1a1a, #000);
+    border: 1px solid var(--gold);
+    padding: 20px;
+    border-radius: 15px;
+    position: relative;
+  }
+  .pulse {
+    width: 10px;
+    height: 10px;
+    background: #10B981;
+    border-radius: 50%;
+    display: inline-block;
+    animation: p 2s infinite;
+  }
+  @keyframes p {
+    0%   { opacity: 1;   }
+    50%  { opacity: 0.3; }
+    100% { opacity: 1;   }
+  }
 </style>
 </head>
 <body>
-<div class="terminal">
+  <header>
+    <img src="logo_ojo.png" alt="Kronos Seal" class="logo">
+    <h1 style="color:var(--primary)">KRONOS PROTOCOL V17</h1>
+    <p style="color:var(--gold)">ARQUITECTO: MARCO ANTONIO ROJAS VALDOVINOS</p>
+  </header>
 
-  <div class="bar">▓ SCDR-001 · TERMINAL v1.0 · ROOT ACCESS ▓</div>
+  <div class="mando-panel">
+    <h3>VERIFICADOR PERIMETRAL CUÁNTICO</h3>
+    <input type="text" id="folio" placeholder="INGRESE FOLIO FVD-XXXXX">
+    <button onclick="ejecutarDictamen()">EJECUTAR ESCANEO</button>
 
-<pre>
-╔══════════════════════════════════════════════════════════════╗
-║  ██████╗██████╗ ██╗████████╗███████╗██████╗ ██╗ ██████╗ ███████╗
-║  ██╔════╝██╔══██╗██║╚══██╔══╝██╔════╝██╔══██╗██║██╔═══██╗██╔════╝
-║  ██║     ██████╔╝██║   ██║   █████╗  ██████╔╝██║██║   ██║███████╗
-║  ██║     ██╔══██╗██║   ██║   ██╔══╝  ██╔══██╗██║██║   ██║╚════██║
-║  ╚██████╗██║  ██║██║   ██║   ███████╗██║  ██║██║╚██████╔╝███████║
-║   ╚═════╝╚═╝  ╚═╝╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝ ╚═════╝ ╚══════╝
-╚══════════════════════════════════════════════════════════════╝
-</pre>
-
-  <h2>▓ 01 · Pandas.py</h2>
-  <p class="prompt">cat Pandas.py</p>
-<pre>
-import pandas as pd
-
-brics_dict = {
-    "country": ["Brazil", "Russia", "India", "China", "South Africa"],
-    "capital": ["Brasilia", "Moscow", "New Delhi", "Beijing", "Pretoria"],
-    "area":    [8.516, 17.10, 3.286, 9.597, 1.221]
-}
-
-brics = pd.DataFrame(brics_dict)
-brics.index = ["BR", "RU", "IN", "CH", "SA"]
-print(brics)
-</pre>
-  <p><a href="Pandas.py" download>▸ descargar Pandas.py</a></p>
-
-  <h2>▓ 02 · Callback.js</h2>
-  <p class="prompt">cat Callback.js</p>
-<pre>
-function invokeCallback(callback) {
-    callback(1);
-    callback(2);
-    callback(3);
-}
-
-function callback(sentence) {
-    console.log(sentence);
-}
-
-invokeCallback(callback);
-</pre>
-  <p><a href="Callback.js" download>▸ descargar Callback.js</a></p>
-
-  <h2>▓ 03 · Hello_World.c</h2>
-  <p class="prompt">cat Hello_World.c</p>
-<pre>
-#include &lt;stdio.h&gt;
-
-int main() {
-    printf("Hello, World!\n");
-    return 0;
-}
-</pre>
-  <p><a href="Hello_World.c" download>▸ descargar Hello_World.c</a></p>
-
-  <div class="box">
-    <p class="ok">[✓] 3 archivos cargados</p>
-    <p class="ok">[✓] Repositorio activo</p>
-    <p class="warn">[!] Ejecución manual requerida</p>
+    <div id="resultado">
+      <div style="color:var(--gold); font-size:0.7em; letter-spacing:5px;">KRONOS PRIVATE</div>
+      <h2 style="color:#10B981"><span class="pulse"></span> VERDE 0 • ACTIVO</h2>
+      <p id="q-status" style="color:var(--quantum); font-size:0.8em;"></p>
+      <p style="font-size:0.6em; opacity:0.5;">
+        HASH: 34c6e0182ce35b3bfb24f88261746a689f5009a0a5260f128be06989b29d34dc
+      </p>
+    </div>
   </div>
 
-  <p class="prompt">_</p>
-
-</div>
+  <script>
+    function ejecutarDictamen() {
+      document.getElementById('resultado').style.display = 'block';
+      const q = document.getElementById('q-status');
+      q.innerHTML = "&gt; INICIANDO RECONSTRUCCIÓN DE RETICULADO (KYBER)...";
+      setTimeout(() => {
+        q.innerHTML = "INTEGRIDAD CUÁNTICA: NIST-L5 PROTECTED";
+      }, 1500);
+    }
+  </script>
 </body>
 </html>
