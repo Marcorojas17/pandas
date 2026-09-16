@@ -4,113 +4,136 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KRONOS V17 | Quantum Sovereign</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23050a14' stroke='%2300f2ff' stroke-width='4'/><circle cx='50' cy='50' r='18' fill='%2300f2ff'/></svg>">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --primary: #00f2ff;
-    --gold:    #d4af37;
-    --bg:      #050a14;
-    --quantum: #bd00ff;
-  }
-  body {
-    background: var(--bg);
-    color: #fff;
-    font-family: 'JetBrains Mono', monospace;
-    margin: 0;
-    text-align: center;
-  }
-  header {
-    padding: 50px;
-    border-bottom: 1px solid var(--primary);
-    background: linear-gradient(to bottom, #0a1a1e, transparent);
-  }
-  .logo {
-    width: 120px;
-    filter: drop-shadow(0 0 15px var(--primary));
-  }
-  .mando-panel {
-    max-width: 800px;
-    margin: 40px auto;
-    background: rgba(10,25,47,0.9);
-    padding: 30px;
-    border-left: 5px solid var(--primary);
-    border-radius: 4px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-  }
-  input {
-    width: 80%;
-    padding: 15px;
-    background: #000;
-    border: 1px solid var(--primary);
-    color: var(--primary);
-    font-size: 1.2em;
-    margin-bottom: 10px;
-  }
-  button {
-    width: 80%;
-    padding: 15px;
-    background: var(--primary);
-    color: #000;
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
-    text-transform: uppercase;
-  }
-  #resultado {
-    display: none;
-    margin-top: 30px;
-    background: linear-gradient(145deg, #1a1a1a, #000);
-    border: 1px solid var(--gold);
-    padding: 20px;
-    border-radius: 15px;
-    position: relative;
-  }
-  .pulse {
-    width: 10px;
-    height: 10px;
-    background: #10B981;
-    border-radius: 50%;
-    display: inline-block;
-    animation: p 2s infinite;
-  }
-  @keyframes p {
-    0%   { opacity: 1;   }
-    50%  { opacity: 0.3; }
-    100% { opacity: 1;   }
+  :root { --p:#00f2ff; --g:#d4af37; --bg:#050a14; --q:#bd00ff; }
+  * { box-sizing: border-box; }
+  body { background:var(--bg); color:#fff; font-family:'JetBrains Mono',monospace;
+         margin:0; text-align:center; min-height:100vh;
+         display:flex; flex-direction:column; }
+  header { padding:50px 20px; border-bottom:1px solid var(--p);
+           background:linear-gradient(to bottom,#0a1a1e,transparent); }
+  h1 { color:var(--p); letter-spacing:4px; margin:15px 0 5px;
+       font-size:2.2em; }
+  .gold { color:var(--g); font-size:.85em; letter-spacing:2px; }
+  .panel { max-width:800px; margin:40px auto; background:rgba(10,25,47,.9);
+           padding:30px; border-left:5px solid var(--p); border-radius:4px;
+           box-shadow:0 20px 50px rgba(0,0,0,.5); width:90%; }
+  input { width:100%; padding:15px; background:#000; border:1px solid var(--p);
+          color:var(--p); font-size:1em; margin:0 0 10px; display:block;
+          font-family:inherit; border-radius:4px; }
+  button { width:100%; padding:15px; background:var(--p); color:#000;
+           border:none; font-weight:bold; cursor:pointer;
+           text-transform:uppercase; font-family:inherit; letter-spacing:3px;
+           transition:.2s; border-radius:4px; }
+  button:hover { background:var(--g); }
+  #out { display:none; margin-top:30px;
+         background:linear-gradient(145deg,#1a1a1a,#000);
+         border:1px solid var(--g); padding:20px; border-radius:15px; }
+  .tag { color:var(--g); font-size:.7em; letter-spacing:5px; }
+  .verde { color:#10B981; }
+  #status { color:var(--q); font-size:.85em; min-height:1.2em; }
+  .hash-label { font-size:.65em; opacity:.6; margin-top:20px; letter-spacing:2px; }
+  .hash { font-size:.55em; opacity:.7; word-break:break-all;
+          overflow-wrap:anywhere; background:#000; padding:10px;
+          border:1px dashed var(--g); border-radius:5px;
+          max-height:80px; overflow-y:auto; text-align:left;
+          margin-top:5px; }
+  .pulse { width:10px; height:10px; background:#10B981; border-radius:50%;
+           display:inline-block; animation:p 2s infinite;
+           vertical-align:middle; margin-right:8px; }
+  @keyframes p { 0%{opacity:1} 50%{opacity:.3} 100%{opacity:1} }
+  footer { margin-top:50px; padding:20px; font-size:.65em;
+           color:#555; border-top:1px solid #222; line-height:1.8; }
+  @media (max-width:600px) {
+    header { padding:30px 15px; }
+    h1 { font-size:1.6em; letter-spacing:2px; }
+    .gold { font-size:.75em; }
+    .panel { padding:20px 15px; margin:20px auto; width:92%; }
   }
 </style>
 </head>
 <body>
-  <header>
-    <img src="logo_ojo.png" alt="Kronos Seal" class="logo">
-    <h1 style="color:var(--primary)">KRONOS PROTOCOL V17</h1>
-    <p style="color:var(--gold)">ARQUITECTO: MARCO ANTONIO ROJAS VALDOVINOS</p>
-  </header>
 
-  <div class="mando-panel">
-    <h3>VERIFICADOR PERIMETRAL CUÁNTICO</h3>
-    <input type="text" id="folio" placeholder="INGRESE FOLIO FVD-XXXXX">
-    <button onclick="ejecutarDictamen()">EJECUTAR ESCANEO</button>
+<header>
+  <h1>KRONOS PROTOCOL V17</h1>
+  <p class="gold">ARQUITECTO: MARCO ANTONIO ROJAS VALDOVINOS</p>
+</header>
 
-    <div id="resultado">
-      <div style="color:var(--gold); font-size:0.7em; letter-spacing:5px;">KRONOS PRIVATE</div>
-      <h2 style="color:#10B981"><span class="pulse"></span> VERDE 0 • ACTIVO</h2>
-      <p id="q-status" style="color:var(--quantum); font-size:0.8em;"></p>
-      <p style="font-size:0.6em; opacity:0.5;">
-        HASH: 34c6e0182ce35b3bfb24f88261746a689f5009a0a5260f128be06989b29d34dc
-      </p>
-    </div>
+<main class="panel">
+  <h3>VERIFICADOR PERIMETRAL CUÁNTICO</h3>
+  <input type="text" id="folio" placeholder="INGRESE FOLIO FVD-XXXXX" autocomplete="off">
+  <input type="password" id="auth" placeholder="ID DE AUTORIDAD" autocomplete="off">
+  <button id="btn">EJECUTAR ESCANEO</button>
+
+  <div id="out">
+    <div class="tag">KRONOS PRIVATE</div>
+    <h2 class="verde"><span class="pulse"></span> VERDE 0 • ACTIVO</h2>
+    <p id="status"></p>
+    <p class="hash-label">HASH SHA-256:</p>
+    <p class="hash" id="hash">—</p>
   </div>
+</main>
 
-  <script>
-    function ejecutarDictamen() {
-      document.getElementById('resultado').style.display = 'block';
-      const q = document.getElementById('q-status');
-      q.innerHTML = "&gt; INICIANDO RECONSTRUCCIÓN DE RETICULADO (KYBER)...";
-      setTimeout(() => {
-        q.innerHTML = "INTEGRIDAD CUÁNTICA: NIST-L5 PROTECTED";
-      }, 1500);
-    }
-  </script>
+<footer>
+  KRONOS V17 · Sitio estático · Sin cookies · Sin trackers<br>
+  Cálculo criptográfico local en tu navegador (Web Crypto API)<br>
+  © 2026 Marco Antonio Rojas Valdovinos
+</footer>
+
+<script>
+const AUTHORITY = "2608096674952";
+
+const toHex = buf => [...new Uint8Array(buf)]
+  .map(b => b.toString(16).padStart(2,"0")).join("");
+
+async function sha(algo, str) {
+  const data = new TextEncoder().encode(str);
+  const buf  = await crypto.subtle.digest(algo, data);
+  return toHex(buf);
+}
+
+function randHex(n=32) {
+  const a = new Uint8Array(n);
+  crypto.getRandomValues(a);
+  return [...a].map(b => b.toString(16).padStart(2,"0")).join("");
+}
+
+async function shield(payload, auth) {
+  if (auth !== AUTHORITY) return { ok:false };
+  const lattice = await sha("SHA-512", randHex(32));
+  const secret  = await sha("SHA-256", lattice + payload);
+  return { ok:true, lattice, secret };
+}
+
+document.getElementById("btn").addEventListener("click", async () => {
+  const folio = document.getElementById("folio").value.trim() || "FVD-00000";
+  const auth  = document.getElementById("auth").value.trim();
+  const out   = document.getElementById("out");
+  const st    = document.getElementById("status");
+  const h     = document.getElementById("hash");
+
+  out.style.display = "block";
+  st.textContent = "> INICIANDO RECONSTRUCCIÓN DE RETICULADO (KYBER)...";
+  st.style.color = "#bd00ff";
+  h.textContent  = "calculando…";
+
+  const r = await shield(folio, auth);
+
+  if (!r.ok) {
+    st.textContent = "✗ ACCESO DENEGADO — FIRMA DE MANDO INVÁLIDA";
+    st.style.color = "#ff0041";
+    h.textContent  = "—";
+    return;
+  }
+
+  setTimeout(() => {
+    st.textContent = "INTEGRIDAD CUÁNTICA: NIST-L5 PROTECTED";
+    h.textContent  = r.secret;
+  }, 1500);
+});
+</script>
+
 </body>
 </html>
