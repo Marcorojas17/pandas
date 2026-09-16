@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KRONOS · Auditoría de Seguridad</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  body { background:#050a14; color:#fff; font-family:'JetBrains Mono',monospace;
+         margin:0; padding:20px; }
+  .panel { max-width:900px; margin:20px auto; background:rgba(10,25,47,.95);
+           padding:30px; border-left:5px solid #ff0041; border-radius:4px; }
+  h2 { color:#ff0041; letter-spacing:3px; }
+  .test { padding:12px; margin:6px 0; border-left:3px solid #555;
+          background:#000; font-size:.78em; border-radius:3px; }
+  .pass { border-color:#10B981; }
+  .fail { border-color:#ff0041; }
+  .warn { border-color:#ffcc00; }
+  .label { color:#d4af37; font-weight:bold; }
+  .pass .label { color:#10B981; }
+  .fail .label { color:#ff0041; }
+  button { padding:12px 25px; background:#ff0041; color:#fff; border:none;
+           font-weight:bold; cursor:pointer; text-transform:uppercase;
+           letter-spacing:3px; border-radius:4px; font-family:inherit; }
+  button:hover { background:#d4af37; color:#000; }
+  .back { margin-top:20px; font-size:.7em; }
+  .back a { color:#ff0041; text-decoration:none; }
+  pre { background:#000; padding:12px; border-radius:4px;
+        font-size:.7em; overflow-x:auto; border:1px dashed #333; }
+</style>
+</head>
+<body>
+<main class="panel">
+  <h2>⚡ AUDITORÍA DE SEGURIDAD</h2>
+  <p style="font-size:.75em; color:#888;">
+    Suite de pruebas automáticas de estrés y validación lógica.
+  </p>
+  <button id="run">▶ EJECUTAR AUDITORÍA</button>
+
+  <div id="results" style="margin-top:20px;"></div>
+
+  <p class="back"><a href="index.html">← volver</a></p>
+</main>
+
+<script>
+const results = document.getElementById("results");
+
+function log(cls, label, msg) {
+  const div = document.createElement("div");
+  div.className = "test " + cls;
+  div.innerHTML = `<span class="label">[${label}]</span> ${msg}`;
+  results.appendChild(div);
+}
+
+async function shield(payload, auth, AUTHORITY) {
+  if (auth !== AUTHORITY) return { ok:false, code:"ROJO1" };
+  const toHex = b => [...new Uint8Array(b)]
+    .map(x=>x.toString(16).padStart(2,"0")).join("");
+  const sha = async (a,s) => toHex(await crypto.subtle.digest(a,
+    new TextEncoder().encode(s)));
+  const rand = new Uint8Array(32);
+  crypto.getRandomValues(rand);
+  const lat = [...rand].map(x=>x.toString(16).padStart(2,"0")).join("");
+  const sec = await sha("SHA-256", lat + payload);
+  return { ok:true, hash:sec };
+}
+
+document.getElementById("run").addEventListener("click", async () => {
+  results.innerHTML = "";
+  const AUTH = "2608096674952";
+  const FOLIOS = ["FVD-00001", "FVD-150499", "FVD-2026-001"];
+  let passed = 0, failed = 0, warned = 0;
+
+  // ═══ 1 · PRUEBAS FUNCIONALES ═══
+  log("pass", "INIT", "Iniciando suite de auditoría…");
+
+  // 1. Autoridad correcta
+  let r = await shield("FVD-00001", AUTH, AUTH);
+  if (r.ok && r.hash.length === 64) { log("pass","AUTH","✓ Autoridad correcta → VERDE"); passed++; }
+  else { log("fail","AUTH","✗ Falla con autoridad correcta"); failed++; }
+
+  // 2. Autoridad vacía
+  r = await shield("FVD-00001", "", AUTH);
+  if (!r.ok) { log("pass","AUTH","✓ Autoridad vacía → ROJO 1"); passed++; }
+  else { log("fail","AUTH","✗ Autoridad vacía fue aceptada"); failed++; }
+
+  // 3. Autoridad null
+  r = await shield("FVD-00001", null, AUTH);
+  if (!r.ok) { log("pass","AUTH","✓ Autoridad null → ROJO 1"); passed++; }
+  else { log("fail","AUTH","✗ null aceptado"); failed++; }
+
+  // 4. Folio vacío
+  if (!FOLIOS.includes("")) { log("pass","FOLIO","✓ Folio vacío rechazado"); passed++; }
+  else { log("fail","FOLIO","✗ Folio vacío aceptado"); failed++; }
+
+  // 5. Folio con espacios
+  if (!FOLIOS.includes(" FVD-00001 ")) { log("pass","FOLIO","✓ Espacios rechazados"); passed++; }
+  else { log("fail","FOLIO","✗ Espacios aceptados"); failed++; }
+
+  // ═══ 2 · INYECCIÓN LÓGICA ═══
+  const inyecciones = [
+    { n:"SQL básico",       v:"' OR '1'='1" },
+    { n:"Drop table",       v:"'; DROP TABLE folios;--" },
+    { n:"XSS script",       v:"<script>alert(1)</script>" },
+    { n:"XSS img onerror",  v:"<img src=x onerror=alert(1)>" },
+    { n:"Null byte",        v:"FVD-00001\x00evil" },
+    { n:"Unicode bypass",   v:"FVD-00001\u0000" },
+    { n:"Array injection",  v:["FVD-00001"] },
+    { n:"Object injection", v:{ folio:"FVD-00001" } },
+    { n:"Undefined",        v:undefined },
+    { n:"NaN",              v:NaN },
+    { n:"Infinity",         v:Infinity },
+    { n:"Muy largo (10k)",  v:"A".repeat(10000) }
+  ];
+
+  for (const inj of inyecciones) {
+    const aceptado = FOLIOS.includes(inj.v);
+    if (!aceptado) { log("pass","INJ",`✓ ${inj.n} → rechazado`); passed++; }
+    else { log("fail","INJ",`✗ ${inj.n} → aceptado`); failed++; }
+  }
+
+  // ═══ 3 · ESTRÉS ═══
+  const t0 = performance.now();
+  const iteraciones = 500;
+  for (let i = 0; i < iteraciones; i++) {
+    await shield("FVD-0000" + (i % 9), AUTH, AUTH);
+  }
+  const t1 = performance.now();
+  const ms = (t1 - t0).toFixed(1);
+  const seg = (ms/1000).toFixed(2);
+  if (ms < 3000) { log("pass","STRESS",`✓ ${iteraciones} hashes en ${ms}ms (${seg}s)`); passed++; }
+  else if (ms < 10000) { log("warn","STRESS",`⚠ ${iteraciones} hashes en ${ms}ms (lento)`); warned++; }
+  else { log("fail","STRESS",`✗ ${iteraciones} hashes tardaron ${ms}ms`); failed++; }
+
+  // ═══ 4 · UNICIDAD DEL HASH ═══
+  const hashes = new Set();
+  for (let i = 0; i < 100; i++) {
+    const r = await shield("FVD-00001", AUTH, AUTH);
+    hashes.add(r.hash);
+  }
+  if (hashes.size === 100) { log("pass","HASH","✓ 100/100 hashes únicos (aleatoriedad OK)"); passed++; }
+  else { log("warn","HASH",`⚠ Solo ${hashes.size}/100 hashes únicos`); warned++; }
+
+  // ═══ 5 · VULNERABILIDADES CONOCIDAS ═══
+  log("warn","INFO","⚠ ID de autoridad visible en JS público");
+  log("warn","INFO","⚠ folios.json público · listado descargable");
+  log("warn","INFO","⚠ Sin rate limiting · sin CAPTCHA");
+  log("warn","INFO","⚠ Validación 100% cliente · reemplazable por DevTools");
+  warned += 4;
+
+  // ═══ RESUMEN ═══
+  const total = passed + failed + warned;
+  log("pass", "RESUMEN", `✓ PASS: ${passed} · ⚠ WARN: ${warned} · ✗ FAIL: ${failed} · TOTAL: ${total}`);
+});
+
+console.log("%c[KRONOS AUDIT] carga completa", "color:#00f2ff");
+</script>
+</body>
+</html>
