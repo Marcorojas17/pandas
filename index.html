@@ -32,8 +32,10 @@
          border:1px solid var(--g); padding:20px; border-radius:15px; }
   .tag { color:var(--g); font-size:.7em; letter-spacing:5px; }
   #titulo-status { color:#10B981; transition:color .3s; }
-  #status { color:var(--q); font-size:.85em; min-height:1.2em; transition:color .3s; }
-  .hash-label { font-size:.65em; opacity:.6; margin-top:20px; letter-spacing:2px; }
+  #status { color:var(--q); font-size:.85em; min-height:1.2em;
+            transition:color .3s; }
+  .hash-label { font-size:.65em; opacity:.6; margin-top:20px;
+                letter-spacing:2px; }
   .hash { font-size:.55em; opacity:.7; word-break:break-all;
           overflow-wrap:anywhere; background:#000; padding:10px;
           border:1px dashed var(--g); border-radius:5px;
@@ -82,8 +84,20 @@
 </footer>
 
 <script>
-const AUTHORITY = "2608096674952";
+// ═══════════════════════════════════════════════════════════
+// ▓ KRONOS V17 · LATTICE SHIELD + CONTROLADOR
+// ═══════════════════════════════════════════════════════════
 
+const AUTHORITY = "2608096674952";
+let FOLIOS_VALIDOS = [];
+
+// ── Cargar folios.json ──────────────────────────────────────
+fetch('folios.json')
+  .then(r => r.json())
+  .then(data => { FOLIOS_VALIDOS = data.folios_validos || []; })
+  .catch(() => { console.warn("folios.json no disponible"); });
+
+// ── Utilidades criptográficas ──────────────────────────────
 const toHex = buf => [...new Uint8Array(buf)]
   .map(b => b.toString(16).padStart(2,"0")).join("");
 
@@ -106,8 +120,9 @@ async function shield(payload, auth) {
   return { ok:true, lattice, secret };
 }
 
+// ── Controlador de UI ───────────────────────────────────────
 document.getElementById("btn").addEventListener("click", async () => {
-  const folio = document.getElementById("folio").value.trim() || "FVD-00000";
+  const folio = document.getElementById("folio").value.trim();
   const auth  = document.getElementById("auth").value.trim();
   const out   = document.getElementById("out");
   const st    = document.getElementById("status");
@@ -115,15 +130,9 @@ document.getElementById("btn").addEventListener("click", async () => {
   const tit   = document.getElementById("titulo-status");
 
   out.style.display = "block";
-  st.textContent = "> INICIANDO RECONSTRUCCIÓN DE RETICULADO (KYBER)...";
-  st.style.color = "#bd00ff";
-  h.textContent  = "calculando…";
-  tit.innerHTML  = '<span class="pulse" style="background:#d4af37"></span> ESCANEANDO...';
-  tit.style.color = "#d4af37";
 
-  const r = await shield(folio, auth);
-
-  if (!r.ok) {
+  // Validación 1 · Autoridad
+  if (auth !== AUTHORITY) {
     st.textContent = "✗ ACCESO DENEGADO — FIRMA DE MANDO INVÁLIDA";
     st.style.color = "#ff0041";
     h.textContent  = "—";
@@ -131,6 +140,25 @@ document.getElementById("btn").addEventListener("click", async () => {
     tit.style.color = "#ff0041";
     return;
   }
+
+  // Validación 2 · Folio registrado
+  if (FOLIOS_VALIDOS.length > 0 && !FOLIOS_VALIDOS.includes(folio)) {
+    st.textContent = "✗ FOLIO NO REGISTRADO — FUERA DEL PERÍMETRO";
+    st.style.color = "#ff0041";
+    h.textContent  = "—";
+    tit.innerHTML  = '<span class="pulse" style="background:#ff0041"></span> ROJO 2 • NO REGISTRADO';
+    tit.style.color = "#ff0041";
+    return;
+  }
+
+  // Todo bien → escanear
+  st.textContent = "> INICIANDO RECONSTRUCCIÓN DE RETICULADO (KYBER)...";
+  st.style.color = "#bd00ff";
+  h.textContent  = "calculando…";
+  tit.innerHTML  = '<span class="pulse" style="background:#d4af37"></span> ESCANEANDO...';
+  tit.style.color = "#d4af37";
+
+  const r = await shield(folio, auth);
 
   setTimeout(() => {
     st.textContent = "INTEGRIDAD CUÁNTICA: NIST-L5 PROTECTED";
