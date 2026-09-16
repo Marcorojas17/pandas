@@ -1,0 +1,22 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ ║
+║ ▓                                                                          ▓ ║
+║ ▓   COMANDO MAESTRO V20 (sin terminal, pegando en la web)                  ▓ ║
+║ ▓                                                                          ▓ ║
+║ ▓   Si NO tienes terminal, NO uses kronos_deploy.sh.                       ▓ ║
+║ ▓   Hazlo a mano así:                                                      ▓ ║
+║ ▓                                                                          ▓ ║
+║ ▓   [1] En GitHub → tu repo → Settings                                     ▓ ║
+║ ▓   [2] Cambia el nombre del repo a: kronosproyect.github.io               ▓ ║
+║ ▓   [3] Settings → Pages → Source: main / root → Save                      ▓ ║
+║ ▓   [4] Settings → General → Visibility → Public                           ▓ ║
+║ ▓   [5] Espera 60s → abre https://kronosproyect.github.io/                 ▓ ║
+║ ▓                                                                          ▓ ║
+║ ▓   ✓ Eliminas el 404                                                      ▓ ║
+║ ▓   ✓ Reclamas el dominio                                                  ▓ ║
+║ ▓   ✓ Activas la red                                                       ▓ ║
+║ ▓                                                                          ▓ ║
+║ ▓   root@kronos:~# _                                                       ▓ ║
+║ ▓                                                                          ▓ ║
+║ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ ║
+╚══════════════════════════════════════════════════════════════════════════════╝
