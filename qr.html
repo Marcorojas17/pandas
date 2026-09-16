@@ -14,10 +14,10 @@
            padding:30px; border-left:5px solid #00f2ff; border-radius:4px;
            box-shadow:0 20px 50px rgba(0,0,0,.6); }
   h2 { color:#fff; letter-spacing:2px; margin:0 0 20px; }
-  .qrwrap { background:#fff; padding:20px; border-radius:10px;
-            display:inline-block; margin:20px auto;
-            box-shadow:0 0 30px rgba(0,242,255,.5); }
-  .qrwrap img { display:block; width:300px; height:300px; }
+  #qrbox { background:#fff; padding:20px; border-radius:10px;
+           display:inline-block; margin:20px auto;
+           box-shadow:0 0 30px rgba(0,242,255,.5); }
+  #qrbox canvas { display:block; width:320px; height:320px; }
   .url { font-size:.65em; color:#00f2ff; word-break:break-all; margin-top:15px; }
   button { width:100%; padding:15px; background:#00f2ff; color:#000;
            border:none; font-weight:bold; cursor:pointer;
@@ -32,37 +32,85 @@
 <main class="panel">
   <h2>KRONOS · CÓDIGO QR</h2>
 
-  <div class="qrwrap">
-    <img id="qr"
-      src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=https%3A%2F%2Fnarcorojas17.github.io%2Fverificador.html"
-      alt="Código QR de verificación">
-  </div>
+  <div id="qrbox"><canvas id="cv"></canvas></div>
 
   <p class="url">https://narcorojas17.github.io/verificador.html</p>
-
   <button id="dl">DESCARGAR PNG</button>
   <p class="back"><a href="index.html">← volver al inicio</a></p>
 </main>
 
 <script>
-  const URL_VERIF = "https://narcorojas17.github.io/verificador.html";
-  const API = "https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=20&data="
-              + encodeURIComponent(URL_VERIF);
+const URL_VERIF = "https://narcorojas17.github.io/verificador.html";
+const SIZE = 600;
+const cv = document.getElementById("cv");
+cv.width  = SIZE;
+cv.height = SIZE;
+const ctx = cv.getContext("2d");
 
-  document.getElementById("dl").addEventListener("click", async () => {
-    try {
-      const res = await fetch(API);
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "kronos-qr.png";
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      alert("No se pudo descargar. Abre la imagen y guárdala manualmente.");
-    }
-  });
+// Cargar QR base desde API
+const img = new Image();
+img.crossOrigin = "anonymous";
+img.src = "https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=0&ecc=H&data="
+        + encodeURIComponent(URL_VERIF);
+
+img.onload = () => {
+  ctx.drawImage(img, 0, 0, SIZE, SIZE);
+  dibujarOjo();
+};
+
+img.onerror = () => {
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, SIZE, SIZE);
+  ctx.fillStyle = "#000";
+  ctx.font = "20px JetBrains Mono, monospace";
+  ctx.textAlign = "center";
+  ctx.fillText("Error al cargar QR", SIZE/2, SIZE/2);
+};
+
+function dibujarOjo() {
+  const cx = SIZE / 2;
+  const cy = SIZE / 2;
+  const R  = SIZE * 0.11;   // 11% del tamaño total (seguro para ECC H)
+
+  // Círculo base negro
+  ctx.fillStyle = "#000";
+  ctx.beginPath();
+  ctx.arc(cx, cy, R, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Anillo cyan
+  ctx.strokeStyle = "#00f2ff";
+  ctx.lineWidth = R * 0.14;
+  ctx.beginPath();
+  ctx.arc(cx, cy, R * 0.78, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Iris morado
+  ctx.fillStyle = "#bd00ff";
+  ctx.beginPath();
+  ctx.arc(cx, cy, R * 0.42, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Pupila negra
+  ctx.fillStyle = "#000";
+  ctx.beginPath();
+  ctx.arc(cx, cy, R * 0.20, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Brillo del ojo
+  ctx.fillStyle = "#00f2ff";
+  ctx.beginPath();
+  ctx.arc(cx - R*0.15, cy - R*0.15, R*0.10, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+document.getElementById("dl").addEventListener("click", () => {
+  if (!img.complete) { alert("Espera a que cargue el QR."); return; }
+  const a = document.createElement("a");
+  a.download = "kronos-qr-eye.png";
+  a.href = cv.toDataURL("image/png");
+  a.click();
+});
 </script>
 </body>
 </html>
