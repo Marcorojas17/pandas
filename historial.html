@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KRONOS · Historial</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23050a14' stroke='%2300f2ff' stroke-width='4'/><circle cx='50' cy='50' r='18' fill='%2300f2ff'/></svg>">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  body { background:#050a14; color:#fff; font-family:'JetBrains Mono',monospace;
+         margin:0; min-height:100vh; padding:20px; }
+  .panel { max-width:800px; margin:20px auto; background:rgba(10,25,47,.95);
+           padding:30px; border-left:5px solid #00f2ff; border-radius:4px;
+           box-shadow:0 20px 50px rgba(0,0,0,.6); }
+  h2 { color:#fff; letter-spacing:2px; }
+  .item { padding:12px 15px; border-left:3px solid #10B981; background:#000;
+          margin-bottom:8px; border-radius:4px; font-size:.75em;
+          word-break:break-all; }
+  .item.rojo { border-color:#ff0041; }
+  .item .meta { color:#d4af37; font-size:.85em; margin-bottom:5px; }
+  .item .hash { color:#00f2ff; font-size:.7em; opacity:.7; }
+  button { padding:12px 20px; background:#00f2ff; color:#000; border:none;
+           font-weight:bold; cursor:pointer; text-transform:uppercase;
+           font-family:inherit; letter-spacing:2px; border-radius:4px;
+           margin-right:8px; margin-top:10px; }
+  button:hover { background:#d4af37; }
+  .empty { color:#555; text-align:center; padding:40px; font-size:.8em; }
+  .back { margin-top:20px; font-size:.75em; }
+  .back a { color:#00f2ff; text-decoration:none; }
+</style>
+</head>
+<body>
+<main class="panel">
+  <h2>KRONOS · HISTORIAL LOCAL</h2>
+  <p style="font-size:.7em; color:#666;">
+    Todos los escaneos quedan registrados SOLO en este navegador.<br>
+    No se envía nada a ningún servidor.
+  </p>
+
+  <div id="lista"><p class="empty">Sin registros todavía.</p></div>
+
+  <button id="exportar">EXPORTAR JSON</button>
+  <button id="limpiar">LIMPIAR</button>
+  <p class="back"><a href="index.html">← volver</a></p>
+</main>
+
+<script>
+const KEY = "kronos_historial_v1";
+const lista = document.getElementById("lista");
+
+function render() {
+  const datos = JSON.parse(localStorage.getItem(KEY) || "[]");
+  if (!datos.length) {
+    lista.innerHTML = '<p class="empty">Sin registros todavía.</p>';
+    return;
+  }
+  lista.innerHTML = datos.slice().reverse().map(d => `
+    <div class="item ${d.estado === "VERDE" ? "" : "rojo"}">
+      <div class="meta">
+        [${d.estado}] · ${d.folio} · ${d.fecha}
+      </div>
+      <div class="hash">${d.hash || "—"}</div>
+    </div>
+  `).join("");
+}
+
+document.getElementById("exportar").addEventListener("click", () => {
+  const datos = localStorage.getItem(KEY) || "[]";
+  const blob = new Blob([datos], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "kronos-historial-" + Date.now() + ".json";
+  a.click();
+});
+
+document.getElementById("limpiar").addEventListener("click", () => {
+  if (confirm("¿Borrar todo el historial local?")) {
+    localStorage.removeItem(KEY);
+    render();
+  }
+});
+
+render();
+</script>
+</body>
+</html>
