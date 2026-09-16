@@ -85,17 +85,29 @@
 
 <script>
 // ═══════════════════════════════════════════════════════════
-// ▓ KRONOS V17 · LATTICE SHIELD + CONTROLADOR
+// ▓ KRONOS V17 · CONTROLADOR + VALIDACIÓN DE FOLIOS
 // ═══════════════════════════════════════════════════════════
 
 const AUTHORITY = "2608096674952";
-let FOLIOS_VALIDOS = [];
 
-// ── Cargar folios.json ──────────────────────────────────────
+// ── FOLIOS VÁLIDOS · Lista embebida (fallback seguro) ──────
+// Edita esta lista cuando quieras añadir folios nuevos.
+let FOLIOS_VALIDOS = [
+  "FVD-00001",
+  "FVD-150499",
+  "FVD-2026-001"
+];
+
+// ── Intentar cargar folios.json (opcional) ─────────────────
 fetch('folios.json')
-  .then(r => r.json())
-  .then(data => { FOLIOS_VALIDOS = data.folios_validos || []; })
-  .catch(() => { console.warn("folios.json no disponible"); });
+  .then(r => r.ok ? r.json() : Promise.reject("404"))
+  .then(data => {
+    if (Array.isArray(data.folios_validos) && data.folios_validos.length > 0) {
+      FOLIOS_VALIDOS = data.folios_validos;
+      console.log("✔ folios.json cargado:", FOLIOS_VALIDOS.length, "folios");
+    }
+  })
+  .catch(() => console.warn("⚠ folios.json no cargado, usando lista embebida"));
 
 // ── Utilidades criptográficas ──────────────────────────────
 const toHex = buf => [...new Uint8Array(buf)]
@@ -141,8 +153,8 @@ document.getElementById("btn").addEventListener("click", async () => {
     return;
   }
 
-  // Validación 2 · Folio registrado
-  if (FOLIOS_VALIDOS.length > 0 && !FOLIOS_VALIDOS.includes(folio)) {
+  // Validación 2 · Folio registrado (ESTRICTA)
+  if (!FOLIOS_VALIDOS.includes(folio)) {
     st.textContent = "✗ FOLIO NO REGISTRADO — FUERA DEL PERÍMETRO";
     st.style.color = "#ff0041";
     h.textContent  = "—";
